@@ -10,7 +10,7 @@ pipeline {
         jiraSendBuildInfo(site: 'devopsbctcs03.atlassian.net', branch: 'matser')
         }
       }
-        }
+     }
     }
 
   }
