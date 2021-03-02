@@ -20,7 +20,7 @@ pipeline {
       steps {
         script { 
           sh '''
-            mvn compile
+            mvn -B -f pom.xml compile
             '''
         }
       }
