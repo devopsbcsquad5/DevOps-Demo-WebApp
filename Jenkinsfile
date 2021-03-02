@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Print Message') {
       steps {
-        echo "Squad5 First blue ocean pipeline 1"
+        echo "Squad5 First blue ocean pipeline 2"
       }
     }
       
