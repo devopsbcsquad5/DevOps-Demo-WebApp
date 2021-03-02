@@ -5,8 +5,10 @@ pipeline {
       steps {
         withSonarQubeEnv(installationName: 'sonarqube-server') { 
           // You can override the credential to be used
-          // sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.6.0.2311:sonar'
-          println env.SONAR_HOST_URL 
+          sh '''
+            mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=sonar -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
+            '''
+          // println env.SONAR_HOST_URL 
         }
       }
       
