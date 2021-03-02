@@ -25,6 +25,20 @@ mvn -B -f pom.xml compile
       }
     }
 
+    stage('Configure Test Server') {
+      steps {
+        script {
+          sh '''
+              gcloud auth activate-service-account --key-file=gcloud_auth
+              gcloud config set compute/zone us-central1-a
+              test-server=`gcloud compute instances describe test-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
+              sed -i 's/squadtestserver/$test-server/g' $(find . -type f)
+              '''
+        }
+
+      }
+    }
+
     stage('Deploy To Test') {
       steps {
         script {
