@@ -1,49 +1,48 @@
 pipeline {
   agent any
-  tools { 
-    maven 'Maven3.6.3' 
-    jdk 'JDK' 
-  }
-  stages{
+  stages {
     stage('Sonar Qube Analysis') {
       steps {
-        withSonarQubeEnv(installationName: 'sonarqube-server') { 
+        withSonarQubeEnv('sonarqube-server') {
           sh '''
             echo "PATH = ${PATH}"
             echo "M2_HOME = ${M2_HOME}"
             mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
             '''
         }
+
       }
     }
+
     stage('Build the project') {
       steps {
-        script { 
+        script {
           sh '''
-            mvn -B -f pom.xml compile
-            '''
+mvn -B -f pom.xml compile
+'''
         }
+
       }
     }
-    stage('UI Test') {
+
+    stage('Deploy To Test') {
       steps {
-        script { 
+        script {
           sh '''
-            mvn -B -f functionaltest/pom.xml test
-            '''
+mvn -B -f pom.xml package
+'''
         }
+
+        sh 'docker build -t devops-docker-squad5-1 .'
       }
     }
 
   }
-  
-      
-  // post {
-  //   always {
-  //     jiraSendBuildInfo(site: 'devopsbctcs03.atlassian.net', branch: 'matser')
-  //   }
-  // }
+  tools {
+    maven 'Maven3.6.3'
+    jdk 'JDK'
+  }
   environment {
-    SONAR_AUTH=credentials('sonar-login')
+    SONAR_AUTH = credentials('sonar-login')
   }
 }
