@@ -5,25 +5,16 @@ pipeline {
     jdk 'JDK' 
   }
   stages {
-    stage('Sonar Qube Analysis') {
+    stage('Print Message') {
       steps {
-        withSonarQubeEnv(installationName: 'sonarqube-server') { 
-          // You can override the credential to be used
-          sh '''
-            echo "PATH = ${PATH}"
-            echo "M2_HOME = ${M2_HOME}"
-            mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=sonar -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
-            '''
-          // println env.SONAR_HOST_URL 
-        }
+        echo "Squad5 First blue ocean pipeline"
       }
-      
-      // post {
-      //   always {
-      //     jiraSendBuildInfo(site: 'devopsbctcs03.atlassian.net', branch: 'matser')
-      //   }
-      // }
     }
-
+      
+    post {
+      always {
+        jiraSendBuildInfo(site: 'devopsbctcs03.atlassian.net', branch: 'matser')
+      }
+    }
   }
 }
