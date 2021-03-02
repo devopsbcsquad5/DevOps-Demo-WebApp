@@ -16,6 +16,15 @@ pipeline {
         }
       }
     }
+    stage('Build the project') {
+      steps {
+        script { 
+          sh '''
+            mvn compile
+            '''
+        }
+      }
+    }
   }
   
       
