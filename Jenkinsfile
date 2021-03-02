@@ -1,9 +1,5 @@
 pipeline {
   agent any
-  tools { 
-    maven 'Maven3.6.3' 
-    jdk 'JDK' 
-  }
   stages {
     stage('Print Message') {
       steps {
