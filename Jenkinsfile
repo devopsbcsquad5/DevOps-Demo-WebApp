@@ -25,6 +25,16 @@ pipeline {
         }
       }
     }
+    stage('UI Test') {
+      steps {
+        script { 
+          sh '''
+            mvn -B -f functionaltest/pom.xml test
+            '''
+        }
+      }
+    }
+
   }
   
       
