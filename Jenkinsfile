@@ -31,8 +31,8 @@ mvn -B -f pom.xml compile
           sh '''
               gcloud auth activate-service-account --key-file=gcloud_auth
               gcloud config set compute/zone us-central1-a
-              test-server=`gcloud compute instances describe test-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
-              sed -i 's/squadtestserver/$test-server/g' $(find . -type f)
+              testserver=`gcloud compute instances describe test-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
+              sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               '''
         }
 
