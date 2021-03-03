@@ -39,17 +39,17 @@ pipeline {
       }
     }
 
-    stage('Run the Unit Testing ') {
-      steps {
-        script {
-          sh '''
-            mvn -B -f pom.xml package
-          '''
-        }
+    // stage('Run the Unit Testing ') {
+    //   steps {
+    //     script {
+    //       sh '''
+    //         mvn -B -f pom.xml package
+    //       '''
+    //     }
 
-        // sh 'docker build -t devops-docker-squad5-1 .'
-      }
-    }
+    //     // sh 'docker build -t devops-docker-squad5-1 .'
+    //   }
+    // }
 
   }
   tools {
