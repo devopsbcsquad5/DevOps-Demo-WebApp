@@ -2,11 +2,11 @@
 - hosts: "{{ myhostserver }}"
   become: yes
   tasks:
- - name: "Transfer the Tomcat installation script"
-   copy: 
+  - name: "Transfer the Tomcat installation script"
+    copy: 
      src: tomcat.sh
      dest: /root/tomcat.sh
-   tags: tomcatInstall
+    tags: tomcatInstall
   - name: "Transfer the postgresql installation script"
     copy: 
       src: postgresql.sh
