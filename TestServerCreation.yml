@@ -1,0 +1,20 @@
+--- #sonar qube creation
+- hosts: "{{ myhostserver }}"
+  become: yes
+  tasks:
+ - name: "Transfer the Tomcat installation script"
+   copy: 
+     src: tomcat.sh
+     dest: /root/tomcat.sh
+   tags: tomcatInstall
+  - name: "Transfer the postgresql installation script"
+    copy: 
+      src: postgresql.sh
+      dest: /root/postgresql.sh
+  - name: "Install Tomcat"
+    shell: bash tomcat.sh > tomcatinstallLog.txt
+    tags: tomcatInstall
+  - name: "Install Postgresql"
+    shell: bash postgresql.sh > postgresqlinstallLog.txt
+    tags: postgresqlInstall
+  
