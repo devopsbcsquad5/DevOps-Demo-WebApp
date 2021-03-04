@@ -43,17 +43,16 @@ pipeline {
     stage('Deploy War on Test server') {
       steps {
         script {
-          sh '''
-            sudo ssh root@test-server -o StrictHostKeyChecking=no"
-              mvn -B -f pom.xml package
-              scp target/*.war /var/lib/tomcat8/webapps/
+          sh """
+            sudo ssh root@test-server -o StrictHostKeyChecking=no '
+              git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
+              cd DevOps-Demo-WebApp
+              mvn package -Dmaven.test.skip=true
+              cp "target/AVNCommunication-1.0.war" /var/lib/tomcat8/webapps/
               systemctl restart tomcat8
-            "
-          '''
+            '
+          """
         }
-        
-
-        // sh 'docker build -t devops-docker-squad5-1 .'
       }
     }
 
