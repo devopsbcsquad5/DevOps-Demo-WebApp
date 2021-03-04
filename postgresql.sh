@@ -41,7 +41,7 @@ sudo mkdir -p $scripts >> $logfile
 # Section 5 - Installing  PSQL
 
 echo "installing PostgreSQL"
-sudo apt-get install -y postgresql postgresql-contrib 
+sudo apt-get install -y postgresql postgresql-contrib
 echo "host    all             all             0.0.0.0/0               md5" >> /etc/postgresql/10/main/pg_hba.conf
 sed -i 's+localhost+*+gI' /etc/postgresql/10/main/postgresql.conf
 sed -i 's+#listen_addresses+listen_addresses+gI' /etc/postgresql/10/main/postgresql.conf
