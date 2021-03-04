@@ -51,6 +51,7 @@ pipeline {
             "
           '''
         }
+        
 
         // sh 'docker build -t devops-docker-squad5-1 .'
       }
