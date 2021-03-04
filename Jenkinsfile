@@ -40,17 +40,21 @@ pipeline {
       }
     }
 
-    // stage('Run the Unit Testing ') {
-    //   steps {
-    //     script {
-    //       sh '''
-    //         mvn -B -f pom.xml package
-    //       '''
-    //     }
+    stage('Deploy War on Test server') {
+      steps {
+        script {
+          sh '''
+            sudo ssh root@test-server -o StrictHostKeyChecking=no"
+              mvn -B -f pom.xml package
+              scp target/*.war /var/lib/tomcat8/webapps/
+              systemctl restart tomcat8
+            "
+          '''
+        }
 
-    //     // sh 'docker build -t devops-docker-squad5-1 .'
-    //   }
-    // }
+        // sh 'docker build -t devops-docker-squad5-1 .'
+      }
+    }
 
   }
   tools {
