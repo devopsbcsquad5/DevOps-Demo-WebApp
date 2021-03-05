@@ -7,7 +7,7 @@ pipeline {
        }
        post {
            always {
-               jiraSendBuildInfo site: '<sitename>.atlassian.net'
+               jiraSendBuildInfo site: 'https://devopsbctcs03.atlassian.net'
            }
        }
     }
