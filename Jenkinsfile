@@ -78,7 +78,11 @@ pipeline {
             "files": [
                 {
                   "pattern": "target/*.war",
-                  "target": "squad5-libs-release-local, squad5-libs-snapshot-local"
+                  "target": "squad5-libs-release-local"
+                },
+                {
+                  "pattern": "target/*.war",
+                  "target": "squad5-libs-snapshot-local"
                 }
               ]
             }"""
