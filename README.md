@@ -5,4 +5,4 @@ my intial commit 01/26
 
 testing polling SCM
 
-testing Poll JIRAA
+testing Poll JIRA
