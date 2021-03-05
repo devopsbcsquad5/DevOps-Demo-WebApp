@@ -7,7 +7,7 @@ pipeline {
        }
        post {
            always {
-               jiraSendBuildInfo site: 'https://devopsbctcs03.atlassian.net'
+               jiraSendBuildInfo site: 'https://devopsbctcs03.atlassian.net/secure/RapidBoard.jspa?rapidView=2&projectKey=DP&selectedIssue=DP-2'
            }
        }
     }
