@@ -63,7 +63,7 @@ pipeline {
         script {
             server = Artifactory.server 'artifactory'
             rtMaven = Artifactory.newMavenBuild()
-            rtMaven.tool = maven // Tool name from Jenkins configuration
+            rtMaven.tool = 'Maven3.6.3' // Tool name from Jenkins configuration
             rtMaven.deployer releaseRepo: 'squad5-libs-release-local', snapshotRepo: 'squad5-libs-snapshot-local', server: server
             rtMaven.resolver releaseRepo: 'squad5-libs-release', snapshotRepo: 'squad5-libs-snapshot', server: server
             rtMaven.deployer.deployArtifacts = false // Disable artifacts deployment during Maven run
