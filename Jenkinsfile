@@ -61,7 +61,7 @@ pipeline {
     stage('Store Artifacts') {
       steps {
         script {
-            server = Artifactory.server artifactory
+            server = Artifactory.server 'artifactory'
             rtMaven = Artifactory.newMavenBuild()
             rtMaven.tool = maven // Tool name from Jenkins configuration
             rtMaven.deployer releaseRepo: 'squad5-libs-release-local', snapshotRepo: 'squad5-libs-snapshot-local', server: server
