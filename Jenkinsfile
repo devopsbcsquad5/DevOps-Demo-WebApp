@@ -27,7 +27,7 @@ pipeline {
        }
        post {
            always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testcatalina', environmentType: 'TESTING', issueKeys: ['DP-2']
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testcatalina', environmentType: 'testing', issueKeys: ['DP-2']
            }
        }
     }
