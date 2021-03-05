@@ -43,21 +43,21 @@ pipeline {
     //   }
     // }
 
-    stage('Deploy War on Test server') {
-      steps {
-        script {
-          sh """
-            sudo ssh root@test-server -o StrictHostKeyChecking=no '
-              git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
-              cd DevOps-Demo-WebApp
-              mvn package -Dmaven.test.skip=true
-              cp "target/AVNCommunication-1.0.war" /var/lib/tomcat8/webapps/
-              systemctl restart tomcat8
-            '
-          """
-        }
-      }
-    }
+    // stage('Deploy War on Test server') {
+    //   steps {
+    //     script {
+    //       sh """
+    //         sudo ssh root@test-server -o StrictHostKeyChecking=no '
+    //           git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
+    //           cd DevOps-Demo-WebApp
+    //           mvn package -Dmaven.test.skip=true
+    //           cp "target/AVNCommunication-1.0.war" /var/lib/tomcat8/webapps/
+    //           systemctl restart tomcat8
+    //         '
+    //       """
+    //     }
+    //   }
+    // }
     stage('Store Artifacts') {
       steps {
         script {
