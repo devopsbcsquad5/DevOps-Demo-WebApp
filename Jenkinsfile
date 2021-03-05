@@ -68,8 +68,8 @@ pipeline {
             rtMaven.resolver releaseRepo: 'squad5-libs-release', snapshotRepo: 'squad5-libs-snapshot', server: server
             rtMaven.deployer.deployArtifacts = false // Disable artifacts deployment during Maven run
             buildInfo = Artifactory.newBuildInfo()
-            rtMaven.run pom: 'target/pom.xml', goals: 'clean test'
-            rtMaven.run pom: 'target/pom.xml', goals: 'install', buildInfo: buildInfo
+            rtMaven.run pom: 'pom.xml', goals: 'clean test'
+            rtMaven.run pom: 'pom.xml', goals: 'install', buildInfo: buildInfo
             rtMaven.deployer.deployArtifacts buildInfo
             server.publishBuildInfo buildInfo
         }
