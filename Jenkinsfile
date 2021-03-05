@@ -76,7 +76,7 @@ pipeline {
             def uploadSpec = """{
             "files": [
               {
-                "pattern": "target/*.war",
+                "pattern": "avnsqlreadme.txt",
                 "target": "squad5-libs-release-local"
               }
           ]
