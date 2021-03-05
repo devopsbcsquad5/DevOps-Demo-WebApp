@@ -1,18 +1,18 @@
 pipeline {
   agent any
   stages {
-    // stage('Sonar Qube Analysis') {
-    //   steps {
-    //     withSonarQubeEnv('sonarqube-server') {
-    //       sh '''
-    //         echo "PATH = ${PATH}"
-    //         echo "M2_HOME = ${M2_HOME}"
-    //         mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
-    //       '''
-    //     }
+    stage('Sonar Qube Analysis') {
+      steps {
+        withSonarQubeEnv('sonarqube-server') {
+          sh '''
+            echo "PATH = ${PATH}"
+            echo "M2_HOME = ${M2_HOME}"
+            mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
+          '''
+        }
 
-    //   }
-    // }
+      }
+    }
 
     stage('Build the project') {
       steps {
@@ -62,6 +62,6 @@ pipeline {
     jdk 'JDK'
   }
   environment {
-    SONAR_AUTH = credentials('sonar-user-token')
+    SONAR_AUTH = credentials('sonar-login')
   }
 }
