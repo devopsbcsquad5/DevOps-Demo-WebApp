@@ -30,5 +30,6 @@ pipeline {
                jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', issueKeys: 'DP-2'
            }
        }
+    }
   }  
 }
