@@ -73,7 +73,7 @@ pipeline {
             // rtMaven.deployer.deployArtifacts buildInfo
             //def uploadSpec = readFile 'target/
             //server.publishBuildInfo buildInfo
-            mvn package -Dmaven.test.skip=true
+            sh """ mvn package -Dmaven.test.skip=true """
             def uploadSpec = """{
             "files": [
                 {
