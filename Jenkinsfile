@@ -43,21 +43,21 @@ pipeline {
     //   }
     // }
 
-    // stage('Deploy War on Test server') {
-    //   steps {
-    //     script {
-    //       sh """
-    //         sudo ssh root@test-server -o StrictHostKeyChecking=no '
-    //           git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
-    //           cd DevOps-Demo-WebApp
-    //           mvn package -Dmaven.test.skip=true
-    //           cp "target/AVNCommunication-1.0.war" /var/lib/tomcat8/webapps/
-    //           systemctl restart tomcat8
-    //         '
-    //       """
-    //     }
-    //   }
-    // }
+    stage('Deploy War on Test server') {
+      steps {
+        script {
+          sh """
+            sudo ssh root@test-server -o StrictHostKeyChecking=no '
+              git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
+              cd DevOps-Demo-WebApp
+              mvn package -Dmaven.test.skip=true
+              cp "target/AVNCommunication-1.0.war" /var/lib/tomcat8/webapps/
+              systemctl restart tomcat8
+            '
+          """
+        }
+      }
+    }
     stage('Store Artifacts') {
       steps {
         script {
@@ -88,6 +88,30 @@ pipeline {
             }"""
             server.upload spec: uploadSpec
 
+        }
+      }
+    }
+    stage('Deploy War on Test server') {
+      steps {
+        // script {
+        //   def downloadSpec = """{
+        //   "files": [
+        //         {
+        //           "pattern": "target/*.war",
+        //           "target": "squad5-libs-release-local"
+        //         }
+        //       ]
+        //   }"""
+        //   server.download spec: downloadSpec
+
+          sh """
+            sudo ssh root@test-server -o StrictHostKeyChecking=no "
+              #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
+              #cd DevOps-Demo-WebApp
+              curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
+              systemctl restart tomcat8
+            "
+          """
         }
       }
     }
