@@ -62,6 +62,6 @@ pipeline {
     jdk 'JDK'
   }
   environment {
-    SONAR_AUTH = credentials('sonar-login')
+    SONAR_AUTH = credentials('sonar-user-token')
   }
 }
