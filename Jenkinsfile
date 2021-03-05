@@ -76,6 +76,7 @@ pipeline {
             def uploadSpec = """{
             "files": [
               {
+                "pattern": "target/*.war",
                 "target": "squad5-libs-release-local"
               }
           ]
