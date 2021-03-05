@@ -7,7 +7,7 @@ pipeline {
        }
        post {
            always {
-               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: 'DP-2'
+               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: ['DP-2']
            }
        }
     }
@@ -17,7 +17,7 @@ pipeline {
        }
        post {
            always {
-               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: 'DP-2'
+               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: ['DP-2']
            }
        }
     }
@@ -27,7 +27,7 @@ pipeline {
        }
        post {
            always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', issueKeys: 'DP-2'
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', issueKeys: ['DP-2']
            }
        }
     }
