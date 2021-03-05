@@ -73,15 +73,16 @@ pipeline {
             // rtMaven.deployer.deployArtifacts buildInfo
             //def uploadSpec = readFile 'target/
             //server.publishBuildInfo buildInfo
+            mvn package -Dmaven.test.skip=true
             def uploadSpec = """{
             "files": [
-              {
-                "pattern": "avnsqlreadme.txt",
-                "target": "squad5-libs-release-local"
-              }
-          ]
-          }"""
-          server.upload spec: uploadSpec
+                {
+                  "pattern": "target/*.war",
+                  "target": "squad5-libs-release-local, squad5-libs-snapshot-local"
+                }
+              ]
+            }"""
+            server.upload spec: uploadSpec
 
         }
       }
