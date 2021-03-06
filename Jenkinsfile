@@ -28,20 +28,20 @@ pipeline {
     //   }
     // }
 
-    // stage('Configure Test Server') {
-    //   steps {
-    //     script {
-    //       sh '''
-    //           gcloud auth activate-service-account --key-file=/var/lib/jenkins/workspace/gcloud_auth
-    //           gcloud config set compute/zone us-central1-a
-    //           testserver=`gcloud compute instances describe test-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
-    //           sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
-    //           sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
-    //       '''
-    //     }
+    stage('Configure Test Server') {
+      steps {
+        script {
+          sh '''
+              gcloud auth activate-service-account --key-file=/var/lib/jenkins/workspace/gcloud_auth
+              gcloud config set compute/zone us-central1-a
+              testserver=`gcloud compute instances describe test-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
+              sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
+              sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
+          '''
+        }
 
-    //   }
-    // }
+      }
+    }
 
     // stage('Deploy War on Test server') {
     //   steps {
