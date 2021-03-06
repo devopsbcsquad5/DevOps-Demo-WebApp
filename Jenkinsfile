@@ -36,7 +36,7 @@ pipeline {
               gcloud config set compute/zone us-central1-a
               testserver=`gcloud compute instances describe test-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
-              sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
+              #sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
           '''
         }
 

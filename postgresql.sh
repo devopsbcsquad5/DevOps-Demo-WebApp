@@ -11,8 +11,8 @@ dfolder='/postgres/data'
 # $sysuser is the system user for running PostgreSQL
 sysuser='postgres'
 # $scripts directory
-#scripts="/home/$USER/scripts"
-scripts="scripts"
+scripts="/home/$USER/scripts"
+#scripts="scripts"
 # $sqlscript is the sql script for creating the PSQL user and creating a database.
 sqlscript="$scripts/initial-table.sql"
 # $logfile is the log file for this installation.
