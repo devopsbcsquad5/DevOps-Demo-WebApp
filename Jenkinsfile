@@ -105,7 +105,7 @@ pipeline {
         //   server.download spec: downloadSpec
 
           sh """
-            sudo scp "target/AVNCommunication-1.0.war" root@test-server:/var/lib/tomcat8/webapps/
+            sudo scp "target/AVNCommunication-1.0.war" root@test-server:/var/lib/tomcat8/webapps/QAWebapp.war
             sudo ssh root@test-server -o StrictHostKeyChecking=no "
               #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
               #cd DevOps-Demo-WebApp
