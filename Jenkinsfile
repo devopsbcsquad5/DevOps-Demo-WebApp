@@ -3,7 +3,8 @@ pipeline {
   stages{
     stage('Build-1') {
        steps {
-         slackSend channel: 'notify', message: 'Performance Testing started: ${env.BUILD_NUMBER}'
+         buildid=${env.BUILD_NUMBER}
+         slackSend channel: 'notify', message: ${env.BUILD_NUMBER}
            echo 'Building......'
          slackSend channel: 'notify', message: 'Performance Testing ended: ${env.BUILD_NUMBER}'
        }
