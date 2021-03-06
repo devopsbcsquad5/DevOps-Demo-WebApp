@@ -115,6 +115,28 @@ pipeline {
         }
       }
 
+    stage('UI Selenium Tests') {
+        steps {
+            slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+            script {
+                sh '''
+                mvn -B -f functionaltest/pom.xml test
+                '''
+                }
+            // publish html
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+        }
+    }
+
+    stage('Performance test'){
+        steps {
+            slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+            blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
+        }
+    }
+    
+    
+    
 
   }
   tools {
