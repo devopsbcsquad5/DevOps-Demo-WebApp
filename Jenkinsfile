@@ -111,6 +111,7 @@ pipeline {
               #cd DevOps-Demo-WebApp
               #curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
               systemctl restart tomcat8
+              sleep 10s
             "
           """
         }
