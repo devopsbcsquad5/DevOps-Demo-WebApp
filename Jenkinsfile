@@ -105,7 +105,7 @@ pipeline {
         //   server.download spec: downloadSpec
 
           sh """
-            sudo scp "target/AVNCommunication-1.0.war" root@prod-server:/var/lib/tomcat8/webapps/QAWebapp.war
+            sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@prod-server:/var/lib/tomcat8/webapps/QAWebapp.war
             sudo ssh root@prod-server -o StrictHostKeyChecking=no "
               #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
               #cd DevOps-Demo-WebApp
@@ -117,25 +117,25 @@ pipeline {
         }
       }
 
-    //stage('UI Selenium Tests') {
-    //    steps {
-    //        slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-    //        script {
-    //            sh '''
-    //            mvn -B -f functionaltest/pom.xml test
-    //            '''
-    //            }
-    //        // publish html
-    //        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
-    //    }
-   // }
+    stage('UI Selenium Tests') {
+       steps {
+           slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+           script {
+               sh '''
+               mvn -B -f functionaltest/pom.xml test
+               '''
+               }
+           // publish html
+           publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+       }
+   }
 
-    stage('Performance test'){
-        steps {
-            slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-            blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-        }
-    }
+    // stage('Performance test'){
+    //     steps {
+    //         slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+    //         blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
+    //     }
+    // }
     
     
     
