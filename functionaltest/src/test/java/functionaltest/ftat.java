@@ -51,9 +51,9 @@ public class ftat {
 		WebElement prepair = wait.until(ExpectedConditions
 				.visibilityOfElementLocated(By.xpath("//p[text()='REPAIR']")));
 		prepair.isDisplayed();
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(25, TimeUnit.SECONDS);
 		driver.get(URL1);
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(25, TimeUnit.SECONDS);
 		WebElement repair = wait.until(
 				ExpectedConditions.visibilityOfElementLocated(By.xpath("//font[text()='Create Repair Ticket']")));
 		repair.isDisplayed();
