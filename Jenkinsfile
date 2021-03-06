@@ -1,42 +1,35 @@
 pipeline {
   agent any
-  stages {
+  stages{
     stage('Build-1') {
-      post {
-        always {
-          jiraSendBuildInfo(site: 'devopsbctcs03.atlassian.net')
-        }
-
-      }
-      steps {
-        echo 'Building......'
-      }
+       steps {
+           echo 'Building......'
+       }
+       post {
+           always {
+               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: ['DP-2']
+           }
+       }
     }
-
     stage('test') {
-      post {
-        always {
-          jiraSendBuildInfo(site: 'devopsbctcs03.atlassian.net')
-        }
-
-      }
-      steps {
-        echo 'Building......'
-        jiraSendBuildInfo(branch: 'DP-2', site: 'https://devopsbctcs03.atlassian.net/')
-      }
+       steps {
+           echo 'Building......'
+       }
+       post {
+           always {
+               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: ['DP-2']
+           }
+       }
     }
-
-    stage('Deploy') {
-      post {
-        always {
-          jiraSendDeploymentInfo(site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testcatalina', environmentType: 'testing', issueKeys: ['DP-2'])
-        }
-
-      }
-      steps {
-        echo 'Building......'
-      }
+ stage('Deploy') {
+       steps {
+           echo 'Building......'
+       }
+       post {
+           always {
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testcatalina', environmentType: 'testing', issueKeys: ['DP-2']
+           }
+       }
     }
-
-  }
+  }  
 }
