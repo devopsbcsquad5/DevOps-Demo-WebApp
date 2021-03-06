@@ -4,32 +4,8 @@ pipeline {
     stage('Build-1') {
        steps {
            echo 'Building......'
-       }
-       post {
-           always {
-               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: ['DP-2']
-           }
+         slackSend channel: 'notify', message: 'Performance Testing started: ${env.JOB_NAME} ${env.BUILD_NUMBER}'
        }
     }
-    stage('test') {
-       steps {
-           echo 'Building......'
-       }
-       post {
-           always {
-               jiraSendBuildInfo site: 'devopsbctcs03.atlassian.net', issueKeys: ['DP-2']
-           }
-       }
-    }
- stage('Deploy') {
-       steps {
-           echo 'Building......'
-       }
-       post {
-           always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testcatalina', environmentType: 'testing', issueKeys: ['DP-2']
-           }
-       }
-    }
-  }  
+  }
 }
