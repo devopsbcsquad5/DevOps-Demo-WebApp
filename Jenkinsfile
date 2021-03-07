@@ -80,7 +80,7 @@ pipeline {
       //      }
       //   }  
 
-      // }
+      }
     }
 
     // stage('Deploy War on Test server') {
