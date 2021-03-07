@@ -6,6 +6,7 @@ pipeline {
   stages {
     // stage('Sonar Qube Analysis') {
     //   steps {
+    //     slackSend channel: 'notify', message: "Sonar Qube Analysis started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
     //     withSonarQubeEnv('sonarqube-server') {
     //       sh '''
     //         echo "PATH = ${PATH}"
@@ -19,17 +20,23 @@ pipeline {
 
     // stage('Build the project') {
     //   steps {
+    //     slackSend channel: 'notify', message: "Build the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
     //     script {
     //       sh '''
     //           mvn -B -f pom.xml compile
     //         '''
     //     }
-
     //   }
+    //   post {
+    //       always {
+    //           jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
+    //       }
+    //   }    
     // }
 
     stage('Configure Test Server') {
       steps {
+        slackSend channel: 'notify', message: "Configure Test Server started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
               #gcloud auth activate-service-account --key-file=/var/lib/jenkins/workspace/gcloud_auth
@@ -45,8 +52,9 @@ pipeline {
       }
     }
     
-    stage('Build the project') {
+    stage('Compile the project') {
       steps {
+        slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
               mvn package -Dmaven.test.skip=true
@@ -115,10 +123,10 @@ pipeline {
         //       ]
         //   }"""
         //   server.download spec: downloadSpec
-
+          slackSend channel: 'notify', message: "Deploy War on Test server started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
           sh """
-            sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@3.17.134.255:/var/lib/tomcat8/webapps/QAWebapp.war
-            #sudo ssh root@3.17.134.255 -o StrictHostKeyChecking=no "
+            sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@18.222.101.244:/var/lib/tomcat8/webapps/QAWebapp.war
+            #sudo ssh root@18.222.101.244 -o StrictHostKeyChecking=no "
               #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
               #cd DevOps-Demo-WebApp
               #curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
@@ -127,6 +135,11 @@ pipeline {
             #"
           """
         }
+       post {
+           always {
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
+           }
+       }      
       }
 
     stage('UI Selenium Tests') {
