@@ -126,8 +126,7 @@ pipeline {
         }
       }
     }
-
-
+    
     stage('Sanity Tests') {
        steps {
            slackSend channel: 'notify', message: "Sanity Testing on Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
