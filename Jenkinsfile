@@ -45,6 +45,16 @@ pipeline {
       }
     }
     
+    stage('Build the project') {
+      steps {
+        script {
+          sh '''
+              mvn -B -f pom.xml compile
+            '''
+        }
+
+      }
+    }
     // stage('Deploy War on Test server') {
     //   steps {
     //     script {
