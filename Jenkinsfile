@@ -45,17 +45,6 @@ pipeline {
       }
     }
 
-  stage('Build the project') {
-      steps {
-        script {
-          sh '''
-              mvn package -Dmaven.test.skip=true
-            '''
-        }
-
-      }
-    }
-
     // stage('Deploy War on Test server') {
     //   steps {
     //     script {
