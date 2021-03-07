@@ -74,13 +74,13 @@ pipeline {
 
             '''
         }
-        post {
-           always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
-           }
-        }  
+      //   post {
+      //      always {
+      //          jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
+      //      }
+      //   }  
 
-      }
+      // }
     }
 
     // stage('Deploy War on Test server') {
