@@ -35,8 +35,10 @@ pipeline {
         script {
           sh '''
               testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
+              prodserver=`grep prod-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
               echo $testserver
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
+              sed -i "s/squadprodserver/$prodserver/g" $(find . -type f)
               #sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
           '''
         }
@@ -64,7 +66,7 @@ pipeline {
               #testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
               #sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@$testserver:/var/lib/tomcat8/webapps/QAWebapp.war
               #config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
-              sudo ansible-playbook -e "deployservers=test-server" dwnldArtifact.yml
+              sudo ansible-playbook -e 'deployservers="test-server" lcp="QA"' dwnldArtifact.yml
 
             '''
         }
@@ -117,10 +119,8 @@ pipeline {
         slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
-              #testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-              #sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@$testserver:/var/lib/tomcat8/webapps/QAWebapp.war
-              #config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
-              sudo ansible-playbook -e "deployservers=prod-server" dwnldArtifact.yml
+          
+              sudo ansible-playbook -e 'deployservers="prod-server" lcp="Prod"' dwnldArtifact.yml
 
             '''
         }
