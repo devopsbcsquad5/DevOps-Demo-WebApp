@@ -91,7 +91,6 @@ pipeline {
       }
     }
 
-
     stage('UI Testing on Test Server') {
        steps {
            slackSend channel: 'notify', message: "UI Testing started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
