@@ -104,44 +104,44 @@ pipeline {
   //       }
   //     }
   //   }
-  //   stage('Deploy War on Test server') {
-  //     steps {
-  //       // script {
-  //       //   def downloadSpec = """{
-  //       //   "files": [
-  //       //         {
-  //       //           "pattern": "target/*.war",
-  //       //           "target": "squad5-libs-release-local"
-  //       //         }
-  //       //       ]
-  //       //   }"""
-  //       //   server.download spec: downloadSpec
+    stage('Deploy War on Test server') {
+      steps {
+        // script {
+        //   def downloadSpec = """{
+        //   "files": [
+        //         {
+        //           "pattern": "target/*.war",
+        //           "target": "squad5-libs-release-local"
+        //         }
+        //       ]
+        //   }"""
+        //   server.download spec: downloadSpec
 
-  //         sh """
-  //           sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@3.17.134.255:/var/lib/tomcat8/webapps/QAWebapp.war
-  //           #sudo ssh root@3.17.134.255 -o StrictHostKeyChecking=no "
-  //             #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
-  //             #cd DevOps-Demo-WebApp
-  //             #curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
-  //             #systemctl restart tomcat8
-  //             #sleep 10s
-  //           #"
-  //         """
-  //       }
-  //     }
+          sh """
+            sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@3.17.134.255:/var/lib/tomcat8/webapps/QAWebapp.war
+            #sudo ssh root@3.17.134.255 -o StrictHostKeyChecking=no "
+              #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
+              #cd DevOps-Demo-WebApp
+              #curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
+              #systemctl restart tomcat8
+              #sleep 10s
+            #"
+          """
+        }
+      }
 
-  //   stage('UI Selenium Tests') {
-  //      steps {
-  //          slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-  //          script {
-  //              sh '''
-  //              mvn -B -f functionaltest/pom.xml test
-  //              '''
-  //              }
-  //          // publish html
-  //          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
-  //      }
-  //  }
+    stage('UI Selenium Tests') {
+       steps {
+           slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+           script {
+               sh '''
+               mvn -B -f functionaltest/pom.xml test
+               '''
+               }
+           // publish html
+           publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+       }
+   }
 
     // stage('Performance test'){
     //     steps {
