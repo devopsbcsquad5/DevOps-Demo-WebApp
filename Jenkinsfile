@@ -28,6 +28,17 @@ pipeline {
     //   }
     // }
 
+    stage('Build the project') {
+      steps {
+        script {
+          sh '''
+              mvn package -Dmaven.test.skip=true
+            '''
+        }
+
+      }
+    }
+
     stage('Configure Test Server') {
       steps {
         script {
