@@ -32,9 +32,10 @@ pipeline {
       steps {
         script {
           sh '''
-              gcloud auth activate-service-account --key-file=/var/lib/jenkins/workspace/gcloud_auth
-              gcloud config set compute/zone us-central1-a
-              testserver=`gcloud compute instances describe prod-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
+              #gcloud auth activate-service-account --key-file=/var/lib/jenkins/workspace/gcloud_auth
+              #gcloud config set compute/zone us-central1-a
+              #testserver=`gcloud compute instances describe prod-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
+              testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               #sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
           '''
