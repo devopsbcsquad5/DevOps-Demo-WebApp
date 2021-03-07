@@ -17,3 +17,7 @@
   - name: "Install Postgresql"
     shell: bash postgresql.sh > postgresqlinstallLog.txt
     tags: postgresqlInstall
+  - name: "Install Java"
+    apt:
+      name: openjdk-8-jdk
+      state: present

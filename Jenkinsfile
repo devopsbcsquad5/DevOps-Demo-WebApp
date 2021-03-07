@@ -34,7 +34,7 @@ pipeline {
           sh '''
               gcloud auth activate-service-account --key-file=/var/lib/jenkins/workspace/gcloud_auth
               gcloud config set compute/zone us-central1-a
-              testserver=`gcloud compute instances describe test-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
+              testserver=`gcloud compute instances describe prod-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'`
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               #sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
           '''
@@ -105,8 +105,8 @@ pipeline {
         //   server.download spec: downloadSpec
 
           sh """
-            sudo scp "target/AVNCommunication-1.0.war" root@test-server:/var/lib/tomcat8/webapps/
-            sudo ssh root@test-server -o StrictHostKeyChecking=no "
+            sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@prod-server:/var/lib/tomcat8/webapps/QAWebapp.war
+            sudo ssh root@prod-server -o StrictHostKeyChecking=no "
               #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
               #cd DevOps-Demo-WebApp
               #curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
@@ -118,24 +118,24 @@ pipeline {
       }
 
     stage('UI Selenium Tests') {
-        steps {
-            slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-            script {
-                sh '''
-                mvn -B -f functionaltest/pom.xml test
-                '''
-                }
-            // publish html
-            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
-        }
-    }
+       steps {
+           slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+           script {
+               sh '''
+               mvn -B -f functionaltest/pom.xml test
+               '''
+               }
+           // publish html
+           publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+       }
+   }
 
-    stage('Performance test'){
-        steps {
-            slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-            blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-        }
-    }
+    // stage('Performance test'){
+    //     steps {
+    //         slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+    //         blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
+    //     }
+    // }
     
     
     
