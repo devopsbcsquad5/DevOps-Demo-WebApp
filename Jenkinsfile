@@ -28,17 +28,6 @@ pipeline {
     //   }
     // }
 
-    stage('Build the project') {
-      steps {
-        script {
-          sh '''
-              mvn package -Dmaven.test.skip=true
-            '''
-        }
-
-      }
-    }
-
     stage('Configure Test Server') {
       steps {
         script {
@@ -51,6 +40,17 @@ pipeline {
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               #sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
           '''
+        }
+
+      }
+    }
+
+    stage('Build the project') {
+      steps {
+        script {
+          sh '''
+              mvn package -Dmaven.test.skip=true
+            '''
         }
 
       }
@@ -132,7 +132,8 @@ pipeline {
 
     stage('UI Selenium Tests') {
        steps {
-           slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+           slackSend channel: 'notify', message: "UI Testing started for JOB and build : $
+           {env.JOB_NAME} ${env.BUILD_NUMBER}"
            script {
                sh '''
                mvn -B -f functionaltest/pom.xml test
