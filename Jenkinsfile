@@ -49,7 +49,7 @@ pipeline {
       steps {
         script {
           sh '''
-              mvn -B -f pom.xml compile
+              mvn package -Dmaven.test.skip=true
             '''
         }
 
