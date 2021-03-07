@@ -1,5 +1,5 @@
 --- 
-- hosts: test-server
+- hosts: {{ deployservers }}
   tasks: 
   - name: Download artifact test 
     become: true 
