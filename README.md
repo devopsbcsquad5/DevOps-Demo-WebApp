@@ -5,4 +5,6 @@ my intial commit 01/26
 
 testing polling SCM
 
-testing Poll JIRA
+
+testing JIRA polling
+
