@@ -106,7 +106,6 @@ pipeline {
         //   server.download spec: downloadSpec
 
           sh """
-            #testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
             sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@3.17.134.255:/var/lib/tomcat8/webapps/QAWebapp.war
             sudo ssh root@3.17.134.255 -o StrictHostKeyChecking=no "
               #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
