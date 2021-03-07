@@ -52,7 +52,7 @@ pipeline {
       }
     }
     
-    stage('Compile the project') {
+    stage('Build the project') {
       steps {
         slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
@@ -63,6 +63,26 @@ pipeline {
 
       }
     }
+
+    stage('Deploy War on Test Server') {
+      steps {
+        slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        script {
+          sh """
+              testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
+              sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@${testserver}:/opt/tomcat/webapps/QAWebapp.war
+
+            """
+        }
+        post {
+           always {
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
+           }
+        }  
+
+      }
+    }
+
     // stage('Deploy War on Test server') {
     //   steps {
     //     script {
@@ -111,36 +131,36 @@ pipeline {
   //       }
   //     }
   //   }
-    stage('Deploy War on Test server') {
-      steps {
-        // script {
-        //   def downloadSpec = """{
-        //   "files": [
-        //         {
-        //           "pattern": "target/*.war",
-        //           "target": "squad5-libs-release-local"
-        //         }
-        //       ]
-        //   }"""
-        //   server.download spec: downloadSpec
-          slackSend channel: 'notify', message: "Deploy War on Test server started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-          sh """
-            sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@18.222.101.244:/var/lib/tomcat8/webapps/QAWebapp.war
-            #sudo ssh root@18.222.101.244 -o StrictHostKeyChecking=no "
-              #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
-              #cd DevOps-Demo-WebApp
-              #curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
-              #systemctl restart tomcat8
-              #sleep 10s
-            #"
-          """
-        }
-       post {
-           always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
-           }
-       }      
-      }
+    // stage('Deploy War on Test server') {
+    //   steps {
+    //     // script {
+    //     //   def downloadSpec = """{
+    //     //   "files": [
+    //     //         {
+    //     //           "pattern": "target/*.war",
+    //     //           "target": "squad5-libs-release-local"
+    //     //         }
+    //     //       ]
+    //     //   }"""
+    //     //   server.download spec: downloadSpec
+    //       slackSend channel: 'notify', message: "Deploy War on Test server started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+    //       sh """
+    //         sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@18.222.101.244:/var/lib/tomcat8/webapps/QAWebapp.war
+    //         #sudo ssh root@18.222.101.244 -o StrictHostKeyChecking=no "
+    //           #git clone https://github.com/devopsbcsquad5/DevOps-Demo-WebApp.git
+    //           #cd DevOps-Demo-WebApp
+    //           #curl -u deploy:'AKCp8ihLPHza9DUHyWNyeq9YND2aZCq91nFTUUiKuYCFomp27gU1GcG4HhqaUZitEiKp7xgrt' https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war -o /var/lib/tomcat8/webapps/AVNCommunication-1.0.war
+    //           #systemctl restart tomcat8
+    //           #sleep 10s
+    //         #"
+    //       """
+    //     }
+    //    post {
+    //        always {
+    //            jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
+    //        }
+    //    }      
+    //  }
 
     stage('UI Selenium Tests') {
        steps {
