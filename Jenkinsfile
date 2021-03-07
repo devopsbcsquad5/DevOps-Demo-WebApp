@@ -64,7 +64,6 @@ pipeline {
               #testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
               #sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@$testserver:/var/lib/tomcat8/webapps/QAWebapp.war
               #config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
-              sudo su -
               sudo ansible-playbook dwnldArtifact.yml
 
             '''
