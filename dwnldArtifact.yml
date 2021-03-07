@@ -5,6 +5,6 @@
     become: true 
     get_url: 
       url: https://devopssquad5.jfrog.io/artifactory/squad5-libs-release-local/AVNCommunication-1.0.war 
-      dest: /tmp/QAWebapp.war
+      dest: /var/lib/tomcat8/webapps/QAWebapp.war
       url_username: devopsbc.squad5.jfrog@gmail.com 
       url_password: AP6VPuxua2CQhM633iiB9Qnd8Ue

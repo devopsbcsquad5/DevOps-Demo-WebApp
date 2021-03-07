@@ -61,8 +61,9 @@ pipeline {
         slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
-              testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-              sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@$testserver:/var/lib/tomcat8/webapps/QAWebapp.war
+              #testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
+              #sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@$testserver:/var/lib/tomcat8/webapps/QAWebapp.war
+              ansible-playbook dwnldArtifact.yml
 
             '''
         }
