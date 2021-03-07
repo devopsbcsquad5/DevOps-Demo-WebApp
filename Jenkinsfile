@@ -4,9 +4,9 @@ def rtMaven
 pipeline {
   agent any
   stages {
-    stage('Sonar Qube Analysis') {
+    stage('Static Code Analysis') {
       steps {
-        slackSend channel: 'notify', message: "Sonar Qube Analysis started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        slackSend channel: 'notify', message: "Static Code Analysis started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         withSonarQubeEnv('sonarqube-server') {
           sh '''
             echo "PATH = ${PATH}"
@@ -20,7 +20,7 @@ pipeline {
 
     stage('Build the project') {
       steps {
-        slackSend channel: 'notify', message: "Build the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        slackSend channel: 'notify', message: "Build the project started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         script {
           sh '''
               mvn -B -f pom.xml compile
@@ -29,9 +29,9 @@ pipeline {
       }
     }
 
-    stage('Configure Test Server') {
+    stage('Configure Test & Prod Server') {
       steps {
-        slackSend channel: 'notify', message: "Configure Test Server started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        slackSend channel: 'notify', message: "Configure Test & Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
               testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
@@ -39,7 +39,6 @@ pipeline {
               echo $testserver
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               sed -i "s/squadprodserver/$prodserver/g" $(find . -type f)
-              #sudo ansible-playbook -e "myhostserver=test-server" TestServerCreation.yml
           '''
         }
 
@@ -48,24 +47,20 @@ pipeline {
     
     stage('Package the project') {
       steps {
-        slackSend channel: 'notify', message: "Package the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        slackSend channel: 'notify', message: "Package the project started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
               mvn package -Dmaven.test.skip=true
             '''
         }
-
       }
     }
 
-    stage('Deploy War on Test Server') {
+    stage('Deploy on Test Server') {
       steps {
-        slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        slackSend channel: 'notify', message: "Deployment of War on Test Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
-              #testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-              #sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@$testserver:/var/lib/tomcat8/webapps/QAWebapp.war
-              #config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
               sudo ansible-playbook -e 'deployservers="test-server" lcp="QA"' dwnldArtifact.yml
 
             '''
@@ -74,6 +69,7 @@ pipeline {
     }
     stage('Store Artifacts') {
       steps {
+        slackSend channel: 'notify', message: "Upload artifacts started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
             server = Artifactory.server 'artifactory'
             sh """ mvn package -Dmaven.test.skip=true """
@@ -96,9 +92,9 @@ pipeline {
     }
 
 
-    stage('UI Selenium Tests') {
+    stage('UI Testing on Test Server') {
        steps {
-           slackSend channel: 'notify', message: "UI Testing started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+           slackSend channel: 'notify', message: "UI Testing started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
            script {
                sh '''
                mvn -B -f functionaltest/pom.xml test
@@ -112,19 +108,6 @@ pipeline {
                jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
            }
        }
-   }
-
-   stage('Deploy War on Prod Server') {
-      steps {
-        slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-        script {
-          sh '''
-          
-              sudo ansible-playbook -e 'deployservers="prod-server" lcp="Prod"' dwnldArtifact.yml
-
-            '''
-        }
-      }
     }
 
     // stage('Performance test'){
@@ -133,9 +116,36 @@ pipeline {
     //         blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
     //     }
     // }
-    
-    
-    
+
+   stage('Deploy on Prod Server') {
+      steps {
+        slackSend channel: 'notify', message: "Deployment of War on Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        script {
+          sh '''
+              sudo ansible-playbook -e 'deployservers="prod-server" lcp="Prod"' dwnldArtifact.yml
+            '''
+        }
+      }
+    }
+
+
+    stage('Sanity Tests') {
+       steps {
+           slackSend channel: 'notify', message: "Sanity Testing on Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+           script {
+               sh '''
+               mvn -B -f Acceptancetest/pom.xml test
+               '''
+               }
+           // publish html
+           publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\Acceptancetest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+       }
+      post {
+           always {
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
+           }
+       }
+   }    
 
   }
   tools {
