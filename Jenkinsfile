@@ -44,9 +44,9 @@ pipeline {
       }
     }
     
-    stage('Build the project') {
+    stage('Package the project') {
       steps {
-        slackSend channel: 'notify', message: "Compile the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        slackSend channel: 'notify', message: "Package the project started for JOB and build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         script {
           sh '''
               mvn package -Dmaven.test.skip=true
