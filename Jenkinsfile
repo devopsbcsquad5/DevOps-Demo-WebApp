@@ -146,6 +146,6 @@ pipeline {
     jdk 'JDK'
   }
   environment {
-    SONAR_AUTH = credentials('admin')
+    SONAR_AUTH = credentials('sonar')
   }
 }
