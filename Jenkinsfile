@@ -70,17 +70,17 @@ pipeline {
         script {
           sh """
               testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-              sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@${testserver}:/opt/tomcat/webapps/QAWebapp.war
+              sudo scp -o StrictHostKeyChecking=no "target/AVNCommunication-1.0.war" root@$testserver:/opt/tomcat/webapps/QAWebapp.war
 
             """
         }
-        post {
-           always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
-           }
-        }  
+      //   post {
+      //      always {
+      //          jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'Test', environmentType: 'testing', issueKeys: ['DP-2']
+      //      }
+      //   }  
 
-      }
+      // }
     }
 
     // stage('Deploy War on Test server') {
