@@ -45,7 +45,7 @@ pipeline {
       }
     }
 
-    stage('Build the project') {
+  stage('Build the project') {
       steps {
         script {
           sh '''
