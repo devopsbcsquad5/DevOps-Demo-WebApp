@@ -71,6 +71,8 @@ pipeline {
               echo $testserver
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               sed -i "s/squadprodserver/$prodserver/g" $(find . -type f)
+              grep URL functionaltest/src/test/java/functionaltest/ftat.java
+              grep URL Acceptancetest/src/test/java/acceptancetest/acat.java 
           '''
         }
       }
