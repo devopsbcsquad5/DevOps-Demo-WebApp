@@ -4,31 +4,50 @@ def rtMaven
 pipeline {
   agent any
   stages {
-    stage('Static Code Analysis') {
-      steps {
-        slackSend channel: 'notify', message: "Static Code Analysis started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
-        withSonarQubeEnv('sonarqube-server') {
-          sh '''
-            echo "PATH = ${PATH}"
-            echo "M2_HOME = ${M2_HOME}"
-            mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
-          '''
+    stage('Initalize') {
+      parallel {
+        stage('Static Code Analysis') {
+          steps {
+            slackSend channel: 'notify', message: "Static Code Analysis started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            withSonarQubeEnv('sonarqube-server') {
+              sh '''
+                echo "PATH = ${PATH}"
+                echo "M2_HOME = ${M2_HOME}"
+                mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
+              '''
+            }
+          }
         }
 
-      }
-    }
-
-    stage('Build the project') {
-      steps {
-        slackSend channel: 'notify', message: "Build the project started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
-        script {
-          sh '''
-              mvn -B -f pom.xml compile
-            '''
+        stage('Build the project') {
+          steps {
+            slackSend channel: 'notify', message: "Build the project started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            script {
+              sh '''
+                  mvn -B -f pom.xml compile
+                '''
+            }
+          }
+        }
+        stage('Startup Test & Prod Server') {
+          steps {
+            slackSend channel: 'notify', message: "Initialize Test & Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            script {
+              sh '''
+                  testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
+                  prodserver=`grep prod-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
+                  for server in $testserver $prodserver
+                  do
+                    sudo ssh -o StrictHostKeyChecking=no root@${server} '
+                      docker run -v /opt/tomcat/webapps:/opt/tomcat/webapps -v /opt/tomcat/logs:/opt/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcatserversquad5
+                      docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
+                    '
+                  done
+                '''
+            }
+          }
         }
       }
-    }
-
     stage('Configure Test & Prod Server') {
       steps {
         slackSend channel: 'notify', message: "Configure Test & Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
@@ -41,10 +60,9 @@ pipeline {
               sed -i "s/squadprodserver/$prodserver/g" $(find . -type f)
           '''
         }
-
       }
     }
-    
+  
     stage('Package the project') {
       steps {
         slackSend channel: 'notify', message: "Package the project started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
@@ -55,7 +73,8 @@ pipeline {
         }
       }
     }
-
+    
+      
     stage('Deploy on Test Server') {
       steps {
         slackSend channel: 'notify', message: "Deployment of War on Test Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
@@ -144,7 +163,7 @@ pipeline {
            }
        }
    }    
-
+    }
   }
   tools {
     maven 'Maven3.6.3'
