@@ -39,9 +39,7 @@ pipeline {
               sh '''
                   testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
                   prodserver=`grep prod-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-                  echo "$testserver" > servers
-                  echo "$prodserver" >> servers
-                  for server in `cat servers`
+                  for server in $testserver $prodserver
                   do
                     sudo ssh -o StrictHostKeyChecking=no root@${server} '
                       if [[ `docker ps -q | wc -l` -gt 0 ]]
