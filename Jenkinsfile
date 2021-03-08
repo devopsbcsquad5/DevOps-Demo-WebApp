@@ -45,14 +45,10 @@ pipeline {
                       if [[ `docker ps -q | wc -l` -gt 0 ]]
                       then 
                         docker container stop $(docker ps -q )
-                        rm -fr /opt/tomcat /opt/postgresql
-                        mkdir /opt/tomcat /opt/postgresql 
                         docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                         chown -R 777 /opt/tomcat /opt/postgresql
                       else 
-                        rm -fr /opt/tomcat /opt/postgresql
-                        mkdir /opt/tomcat /opt/postgresql
                         docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                         chown -R 777 /opt/tomcat /opt/postgresql
