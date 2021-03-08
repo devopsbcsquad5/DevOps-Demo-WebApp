@@ -119,7 +119,7 @@ pipeline {
         script {
           sh '''
               sudo ansible-playbook -e 'deployservers="test-server" lcp="QA"' dwnldArtifact.yml
-
+              sleep 20s
             '''
         }
       }
