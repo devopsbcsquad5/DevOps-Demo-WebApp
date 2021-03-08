@@ -45,9 +45,11 @@ pipeline {
                       if [[ `docker ps -q | wc -l` -gt 0 ]]
                       then 
                         docker container stop $(docker ps -q )
+                        rm -fr /opt/tomcat /opt/postgresql
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                         docker run -v /opt/tomcat/webapps:/opt/tomcat/webapps -v /opt/tomcat/logs:/opt/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcatserversquad5
                       else 
+                        rm -fr /opt/tomcat /opt/postgresql
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                         docker run -v /opt/tomcat/webapps:/opt/tomcat/webapps -v /opt/tomcat/logs:/opt/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcatserversquad5
                       fi
@@ -85,18 +87,6 @@ pipeline {
       }
     }
     
-      
-    stage('Deploy on Test Server') {
-      steps {
-        slackSend channel: 'notify', message: "Deployment of War on Test Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-        script {
-          sh '''
-              sudo ansible-playbook -e 'deployservers="test-server" lcp="QA"' dwnldArtifact.yml
-
-            '''
-        }
-      }
-    }
     stage('Store Artifacts') {
       steps {
         slackSend channel: 'notify', message: "Upload artifacts started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
@@ -120,6 +110,19 @@ pipeline {
         }
       }
     }
+      
+    stage('Deploy on Test Server') {
+      steps {
+        slackSend channel: 'notify', message: "Deployment of War on Test Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        script {
+          sh '''
+              sudo ansible-playbook -e 'deployservers="test-server" lcp="QA"' dwnldArtifact.yml
+
+            '''
+        }
+      }
+    }
+    
 
     stage('UI Testing on Test Server') {
        steps {
