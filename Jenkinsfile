@@ -9,7 +9,7 @@ pipeline {
         stage('Static Code Analysis') {
           steps {
             slackSend channel: 'notify', message: "Static Code Analysis started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
-            script {
+
               withSonarQubeEnv('sonarqube-server') {
                 sh '''
                   echo "PATH = ${PATH}"
@@ -17,7 +17,7 @@ pipeline {
                   mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
                 '''
               }
-            }
+
             
           }
         }
