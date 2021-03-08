@@ -6,21 +6,21 @@ pipeline {
   stages {
     stage('Initalize') {
       parallel {
-        stage('Static Code Analysis') {
-          steps {
-            slackSend channel: 'notify', message: "Static Code Analysis started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        // stage('Static Code Analysis') {
+        //   steps {
+        //     slackSend channel: 'notify', message: "Static Code Analysis started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
 
-              withSonarQubeEnv('sonarqube-server') {
-                sh '''
-                  echo "PATH = ${PATH}"
-                  echo "M2_HOME = ${M2_HOME}"
-                  mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
-                '''
-              }
+        //       withSonarQubeEnv('sonarqube-server') {
+        //         sh '''
+        //           echo "PATH = ${PATH}"
+        //           echo "M2_HOME = ${M2_HOME}"
+        //           mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
+        //         '''
+        //       }
 
             
-          }
-        }
+        //   }
+        // }
 
         stage('Build the project') {
           steps {
@@ -46,11 +46,11 @@ pipeline {
                       then 
                         docker container stop $(docker ps -q )
                         rm -fr /opt/tomcat /opt/postgresql
-                        docker run -v /opt/tomcat/webapps:/opt/tomcat/webapps -v /opt/tomcat/logs:/opt/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcatserversquad5
+                        docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcat:8-jdk8-openjdk-slim
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                       else 
                         rm -fr /opt/tomcat /opt/postgresql
-                        docker run -v /opt/tomcat/webapps:/opt/tomcat/webapps -v /opt/tomcat/logs:/opt/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcatserversquad5
+                        docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcat:8-jdk8-openjdk-slim
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                         
                       fi
