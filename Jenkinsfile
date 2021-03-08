@@ -42,14 +42,14 @@ pipeline {
                   for server in $testserver $prodserver
                   do
                     sudo ssh -o StrictHostKeyChecking=no root@${server} '
-                      if [[ `docker ps | grep 5432 wc -l` -ne 1 ]]
+                      if [[ `docker ps | grep 5432 | wc -l` -ne 1 ]]
                       then 
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                       else 
                         docker container stop `docker ps | grep 5432 | awk '{print $1}'`
                         docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
                       fi
-                      if [[ `docker ps | grep 8080 wc -l` -ne 1 ]]
+                      if [[ `docker ps | grep 8080 | wc -l` -ne 1 ]]
                       then 
                         docker run -v /opt/tomcat/webapps:/opt/tomcat/webapps -v /opt/tomcat/logs:/opt/tomcat/logs -p 8080:8080 -it -d devopsbcsquad5/tomcatserversquad5
                       else 
