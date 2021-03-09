@@ -45,14 +45,11 @@ pipeline {
                       if [[ `docker ps -q | wc -l` -gt 0 ]]
                       then 
                         docker container stop $(docker ps -q )
-                        docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
-                        docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
-                        chown -R 777 /opt/tomcat /opt/postgresql
-                      else 
-                        docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
-                        docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
-                        chown -R 777 /opt/tomcat /opt/postgresql
                       fi
+                      rm -fr /opt/tomcat/webapps/*
+                      docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
+                      docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432devopsbcsquad5/postgresdbsquad5 
+                      chown -R 777 /opt/tomcat /opt/postgresql
                     '
                   done
                 '''
@@ -68,7 +65,7 @@ pipeline {
           sh '''
               testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
               prodserver=`grep prod-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-              echo $testserver
+              echo "Testserver: $testserver and Prodcution: $prodserver"
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               sed -i "s/squadprodserver/$prodserver/g" $(find . -type f)
               grep URL functionaltest/src/test/java/functionaltest/ftat.java
@@ -119,20 +116,6 @@ pipeline {
         script {
           sh '''
               sudo ansible-playbook -e 'deployservers="test-server" lcp="QA"' dwnldArtifact.yml
-              testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-              sudo ssh -o StrictHostKeyChecking=no root@${testserver} '
-                if [[ `docker ps -q | wc -l` -gt 0 ]]
-                then 
-                  docker container stop $(docker ps -q )
-                  docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5
-                  docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
-                  chown -R 777 /opt/tomcat /opt/postgresql
-                else 
-                  docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5
-                  docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
-                  chown -R 777 /opt/tomcat /opt/postgresql
-                fi
-              '
               sleep 20s
             '''
         }
@@ -158,12 +141,12 @@ pipeline {
        }
     }
 
-    stage('Performance test'){
-        steps {
-            slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-            blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-        }
-    }
+    // stage('Performance test'){
+    //     steps {
+    //         slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+    //         blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
+    //     }
+    // }
 
    stage('Deploy on Prod Server') {
       steps {
