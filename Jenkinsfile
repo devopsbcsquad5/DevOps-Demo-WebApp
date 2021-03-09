@@ -139,17 +139,17 @@ pipeline {
        }
       post {
            always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-${env.BUILD_NUMBER}', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
            }
        }
     }
 
-    // stage('Performance test'){
-    //     steps {
-    //         slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-    //         blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-    //     }
-    // }
+    stage('Performance test'){
+        steps {
+            slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+            blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
+        }
+    }
 
    stage('Deploy on Prod Server') {
       steps {
@@ -176,12 +176,13 @@ pipeline {
        }
       post {
            always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-1', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
+               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'prod-${env.BUILD_NUMBER}', environmentName: 'prodserver', environmentType: 'production', issueKeys: ['DP-2']
            }
        }
    }    
   
   }
+
   tools {
     maven 'Maven3.6.3'
     jdk 'JDK'
