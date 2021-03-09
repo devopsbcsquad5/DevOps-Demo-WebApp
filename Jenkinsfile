@@ -41,7 +41,7 @@ pipeline {
                   prodserver=`grep prod-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
                   for server in $testserver $prodserver
                   do
-                    sudo -o StrictHostKeyChecking=no docker-compose.yml root@${server}:/root/docker-compose.yml
+                    sudo scp -o StrictHostKeyChecking=no docker-compose.yml root@${server}:/root/docker-compose.yml
                     sudo ssh -o StrictHostKeyChecking=no root@${server} '
                       if [[ `docker ps -q | wc -l` -gt 0 ]]
                       then 
