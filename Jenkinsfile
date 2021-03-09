@@ -30,7 +30,7 @@ pipeline {
             }
           }
         }
-        stage('Initalize Docker-Compose on Test & Prod Servers') {
+        stage('Initalize Docker Compose on Test & Prod Servers') {
           steps {
             slackSend channel: 'notify', message: "Initialize Test & Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
             script {

@@ -3,6 +3,7 @@ version: "3"
 services:
   tomcat:
     image: tomcat:8-jdk8-openjdk-slim
+    container_name: webserver
     ports:
       - 8080:8080
     networks:
@@ -14,6 +15,7 @@ services:
 
   db:
     image: devopsbcsquad5/postgresdbsquad5
+    container_name: postgresdb
     ports:
       - 5432:5432
     networks:
