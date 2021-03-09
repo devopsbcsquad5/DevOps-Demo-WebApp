@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  tomcat:
+    image: tomcat:8-jdk8-openjdk-slim
+    ports:
+      - 8080:8080
+    networks:
+      - webappnet
+    restart: on-failure
+    volumes:
+      - /opt/tomcat/webapps:/usr/local/tomcat/webapps
+      - /opt/tomcat/logs:/usr/local/tomcat/logs
+
+  db:
+    image: devopsbcsquad5/postgresdbsquad5
+    ports:
+      - 5432:5432
+    networks:
+      - webappnet
+    environment:
+      - POSTGRES_PASSWORD=password
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    restart: on-failure
+    volumes:
+      - /opt/postgresql:/var/lib/postgresql/data
+
+networks:
+  webappnet:

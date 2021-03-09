@@ -44,12 +44,15 @@ pipeline {
                     sudo ssh -o StrictHostKeyChecking=no root@${server} '
                       if [[ `docker ps -q | wc -l` -gt 0 ]]
                       then 
-                        docker container stop $(docker ps -q )
+                        docker-compose down
                       fi
                       rm -fr /opt/tomcat/webapps/*
-                      docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
-                      docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432devopsbcsquad5/postgresdbsquad5 
-                      chown -R 777 /opt/tomcat /opt/postgresql
+                      docker-compose up -d
+                      
+                      #docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
+                      #docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432devopsbcsquad5/#postgresdbsquad5 
+                      #chown -R 777 /opt/tomcat /opt/postgresql
+                      
                     '
                   done
                 '''
