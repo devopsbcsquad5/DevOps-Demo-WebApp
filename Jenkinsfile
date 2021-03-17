@@ -17,8 +17,6 @@ pipeline {
                   mvn "-Dsonar.test.exclusions=**/test/java/servlet/createpage_junit.java " -Dsonar.login=sonar -Dsonar.password=${SONAR_AUTH} -Dsonar.tests=. -Dsonar.inclusions=**/test/java/servlet/createpage_junit.java -Dsonar.sources=. sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL}
                 '''
               }
-
-            
           }
         }
 
@@ -32,7 +30,7 @@ pipeline {
             }
           }
         }
-        stage('Initalize Docker on Test & Prod Servers') {
+        stage('Initalize Docker Compose on Test & Prod Servers') {
           steps {
             slackSend channel: 'notify', message: "Initialize Test & Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
             script {
@@ -41,18 +39,14 @@ pipeline {
                   prodserver=`grep prod-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
                   for server in $testserver $prodserver
                   do
+                    sudo scp -o StrictHostKeyChecking=no docker-compose.yml root@${server}:/root/docker-compose.yml
                     sudo ssh -o StrictHostKeyChecking=no root@${server} '
                       if [[ `docker ps -q | wc -l` -gt 0 ]]
                       then 
-                        docker container stop $(docker ps -q )
-                        docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
-                        docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
-                        chown -R 777 /opt/tomcat /opt/postgresql
-                      else 
-                        docker run -v /opt/tomcat/webapps:/usr/local/tomcat/webapps -v /opt/tomcat/logs:/usr/local/tomcat/logs -p 8080:8080 -it -d tomcat:8-jdk8-openjdk-slim
-                        docker run -d -e POSTGRES_PASSWORD=password -e PGDATA=/var/lib/postgresql/data/pgdata -v /opt/postgresql:/var/lib/postgresql/data -p 5432:5432 devopsbcsquad5/postgresdbsquad5 
-                        chown -R 777 /opt/tomcat /opt/postgresql
+                        docker-compose down
                       fi
+                      rm -fr /opt/tomcat/webapps/*
+                      docker-compose up -d
                     '
                   done
                 '''
@@ -68,7 +62,7 @@ pipeline {
           sh '''
               testserver=`grep test-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
               prodserver=`grep prod-server /etc/ansible/hosts | awk '{print $2}' | cut -d '=' -f2`
-              echo $testserver
+              echo "Testserver: $testserver and Prodcution: $prodserver"
               sed -i "s/squadtestserver/$testserver/g" $(find . -type f)
               sed -i "s/squadprodserver/$prodserver/g" $(find . -type f)
               grep URL functionaltest/src/test/java/functionaltest/ftat.java
@@ -147,7 +141,7 @@ pipeline {
     stage('Performance test'){
         steps {
             slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-            blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
+            // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
         }
     }
 
