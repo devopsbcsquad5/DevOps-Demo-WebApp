@@ -93,13 +93,13 @@ pipeline {
               grep URL Acceptancetest/src/test/java/acceptancetest/acat.java 
           '''
         }
-        post {
-          success {
-            slackSend channel: 'notify', message: "Configure Test & Prod Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
-          }
-          failure {
-            slackSend channel: 'notify', message: "Configure Test & Prod Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
-          }
+      }
+      post {
+        success {
+          slackSend channel: 'notify', message: "Configure Test & Prod Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+        failure {
+          slackSend channel: 'notify', message: "Configure Test & Prod Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         }
       }
     }
@@ -177,16 +177,16 @@ pipeline {
     
 
     stage('UI Testing on Test Server') {
-       steps {
-           slackSend channel: 'notify', message: "UI Testing started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-           script {
-               sh '''
-               mvn -B -f functionaltest/pom.xml test
-               '''
-               }
-           // publish html
-           publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
-       }
+      steps {
+        slackSend channel: 'notify', message: "UI Testing started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        script {
+            sh '''
+            mvn -B -f functionaltest/pom.xml test
+            '''
+            }
+        // publish html
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+      }
       post {
         always {
             jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-${env.BUILD_NUMBER}', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
@@ -201,19 +201,19 @@ pipeline {
     }
 
     stage('Performance test'){
-        steps {
-            slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-            // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-            // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '799387'
+      steps {
+          slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+          // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
+          // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '799387'
+      }
+      post {
+        success {
+          slackSend channel: 'notify', message: "Performance Testing succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         }
-        post {
-          success {
-            slackSend channel: 'notify', message: "Performance Testing succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
-          }
-          failure {
-            slackSend channel: 'notify', message: "Performance Testing failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
-          }
+        failure {
+          slackSend channel: 'notify', message: "Performance Testing failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         }
+      }
     }
 
    stage('Deploy on Prod Server') {
@@ -237,16 +237,16 @@ pipeline {
     }
     
     stage('Sanity Tests') {
-       steps {
-           slackSend channel: 'notify', message: "Sanity Testing on Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-           script {
-               sh '''
-               mvn -B -f Acceptancetest/pom.xml test
-               '''
-               }
-           // publish html
-           publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\Acceptancetest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
-       }
+      steps {
+        slackSend channel: 'notify', message: "Sanity Testing on Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        script {
+            sh '''
+            mvn -B -f Acceptancetest/pom.xml test
+            '''
+            }
+        // publish html
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\Acceptancetest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+      }
       post {
         always {
             jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'prod-${env.BUILD_NUMBER}', environmentName: 'prodserver', environmentType: 'production', issueKeys: ['DP-2']
