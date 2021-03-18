@@ -18,6 +18,14 @@ pipeline {
                 '''
               }
           }
+          post {
+            success {
+              slackSend channel: 'notify', message: "Static Code Analysis succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            }
+            failure {
+              slackSend channel: 'notify', message: "Static Code Analysis failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            }
+          }
         }
 
         stage('Build the project') {
@@ -27,6 +35,14 @@ pipeline {
               sh '''
                   mvn -B -f pom.xml compile
                 '''
+            }
+          }
+          post {
+            success {
+              slackSend channel: 'notify', message: "Build the project succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            }
+            failure {
+              slackSend channel: 'notify', message: "Build the project failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
             }
           }
         }
@@ -52,6 +68,14 @@ pipeline {
                 '''
             }
           }
+          post {
+            success {
+              slackSend channel: 'notify', message: "Initialize Test & Prod Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            }
+            failure {
+              slackSend channel: 'notify', message: "Initialize Test & Prod Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+            }
+          }
         }
       }
     }
@@ -69,6 +93,14 @@ pipeline {
               grep URL Acceptancetest/src/test/java/acceptancetest/acat.java 
           '''
         }
+        post {
+          success {
+            slackSend channel: 'notify', message: "Configure Test & Prod Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+          }
+          failure {
+            slackSend channel: 'notify', message: "Configure Test & Prod Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+          }
+        }
       }
     }
   
@@ -79,6 +111,14 @@ pipeline {
           sh '''
               mvn package -Dmaven.test.skip=true
             '''
+        }
+      }
+      post {
+        success {
+          slackSend channel: 'notify', message: "Package the project succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+        failure {
+          slackSend channel: 'notify', message: "Package the project failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         }
       }
     }
@@ -105,6 +145,14 @@ pipeline {
 
         }
       }
+      post {
+        success {
+          slackSend channel: 'notify', message: "Upload artifacts succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+        failure {
+          slackSend channel: 'notify', message: "Upload artifacts failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+      }
     }
       
     stage('Deploy on Test Server') {
@@ -115,6 +163,14 @@ pipeline {
               sudo ansible-playbook -e 'deployservers="test-server" lcp="QA"' dwnldArtifact.yml
               sleep 20s
             '''
+        }
+      }
+      post {
+        success {
+          slackSend channel: 'notify', message: "Deployment of War on Test Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+        failure {
+          slackSend channel: 'notify', message: "Deployment of War on Test Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         }
       }
     }
@@ -132,9 +188,15 @@ pipeline {
            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\functionaltest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
        }
       post {
-           always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-${env.BUILD_NUMBER}', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
-           }
+        always {
+            jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'test-${env.BUILD_NUMBER}', environmentName: 'testserver', environmentType: 'testing', issueKeys: ['DP-2']
+        }
+        success {
+          slackSend channel: 'notify', message: "UI Testing succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+        failure {
+          slackSend channel: 'notify', message: "UI Testing failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
        }
     }
 
@@ -142,7 +204,15 @@ pipeline {
         steps {
             slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
             // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-            blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '799387'
+            // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '799387'
+        }
+        post {
+          success {
+            slackSend channel: 'notify', message: "Performance Testing succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+          }
+          failure {
+            slackSend channel: 'notify', message: "Performance Testing failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+          }
         }
     }
 
@@ -154,6 +224,14 @@ pipeline {
               sudo ansible-playbook -e 'deployservers="prod-server" lcp="Prod"' dwnldArtifact.yml
               sleep 20s
             '''
+        }
+      }
+      post {
+        success {
+          slackSend channel: 'notify', message: "Deployment of War on Prod Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+        failure {
+          slackSend channel: 'notify', message: "Deployment of War on Prod Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
         }
       }
     }
@@ -170,10 +248,16 @@ pipeline {
            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '\\Acceptancetest\\target\\surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
        }
       post {
-           always {
-               jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'prod-${env.BUILD_NUMBER}', environmentName: 'prodserver', environmentType: 'production', issueKeys: ['DP-2']
-           }
-       }
+        always {
+            jiraSendDeploymentInfo site: 'devopsbctcs03.atlassian.net', environmentId: 'prod-${env.BUILD_NUMBER}', environmentName: 'prodserver', environmentType: 'production', issueKeys: ['DP-2']
+        }
+        success {
+          slackSend channel: 'notify', message: "Sanity Testing on Prod Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+        failure {
+          slackSend channel: 'notify', message: "Sanity Testing on Prod Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+        }
+      }
    }    
   
   }
