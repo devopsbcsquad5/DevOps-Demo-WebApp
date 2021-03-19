@@ -296,13 +296,15 @@ pipeline {
             export story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
             export NEW_LATEST_GIT_SHA=$(git rev-parse HEAD)
             my_merge_branch=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2`
+
+            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"passed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "${MY_PIVOTAL_CICD}"
             
             curl -v -X PUT -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{"current_state":"accepted"}' "${MY_PIVOTAL_STORIES}/${story_nbr}"
 
             ### Code to add the comments to the pivotal story
             curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{ "text":"Squad-5 Pipelinedeployed the new code to AWS Prod-Server from artifactory using docker compose and completed the Sanity testing. Code is live to end-user \\n **Story ID**:  '{story_nbr}' \\n **BRANCH**:  '${my_merge_branch}' \\n **REPO**:  '${MY_REPO}'\\n \\n \\n Story status is updated to **ACCEPTED** " }' "${MY_PIVOTAL_STORIES}/{story_nbr}/comments"
 
-            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"passed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "'${MY_PIVOTAL_CICD}'"
+            
         '''
       }
     }
@@ -313,7 +315,7 @@ pipeline {
             export story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
             export NEW_LATEST_GIT_SHA=$(git rev-parse HEAD)
 
-            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"failed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "'${MY_PIVOTAL_CICD}'"
+            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"failed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "${MY_PIVOTAL_CICD}"
         '''
       }
     }
