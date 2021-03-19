@@ -78,22 +78,23 @@ pipeline {
           }
         }
       }
-    }
-    post {
-      success {
-        script {
-          sh '''
-            ### Code to update the Story state
-            story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
-            my_merge_branch=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2`
-            curl -v -X PUT -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{"current_state":"finished"}' "${MY_PIVOTAL_STORIES}/${story_nbr}"
+      post {
+        success {
+          script {
+            sh '''
+              ### Code to update the Story state
+              story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
+              my_merge_branch=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2`
+              curl -v -X PUT -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{"current_state":"finished"}' "${MY_PIVOTAL_STORIES}/${story_nbr}"
 
-            ### Code to add the comments to the pivotal story
-            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{ "text":"Squad-5 Pipeline started due to new code merge to master from '${story_nbr}' in the github.\\n **BRANCH**:  '${my_merge_branch}' \\n **REPO**:  '${MY_REPO}'\\n \\n \\n Story status is updated to **FINISHED** " }' "${MY_PIVOTAL_STORIES}/${story_nbr}/comments"
-          '''
+              ### Code to add the comments to the pivotal story
+              curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{ "text":"Squad-5 Pipeline started due to new code merge to master from '${story_nbr}' in the github.\\n **BRANCH**:  '${my_merge_branch}' \\n **REPO**:  '${MY_REPO}'\\n \\n \\n Story status is updated to **FINISHED** " }' "${MY_PIVOTAL_STORIES}/${story_nbr}/comments"
+            '''
+          }
         }
       }
     }
+    
     stage('Configure Test & Prod Server') {
       steps {
         slackSend channel: 'notify', message: "Configure Test & Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
