@@ -315,7 +315,7 @@ pipeline {
             export story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
             export NEW_LATEST_GIT_SHA=$(git rev-parse HEAD)
 
-            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"failed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "'${MY_PIVOTAL_CICD}'"
+            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"failed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "${MY_PIVOTAL_CICD}"
         '''
       }
     }
