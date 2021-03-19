@@ -204,7 +204,7 @@ pipeline {
       steps {
           slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
           // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-          blazeMeterTest credentialsId: 'bcb98eda-1130-4c9e-97e3-2262ffd3a6b7', testId: '9204220.taurus', workspaceId: '799387'
+          // blazeMeterTest credentialsId: 'bcb98eda-1130-4c9e-97e3-2262ffd3a6b7', testId: '9204220.taurus', workspaceId: '799387'
       }
       post {
         success {
@@ -261,6 +261,47 @@ pipeline {
    }    
   
   }
+  post {
+    success {
+      sh """ #!/bin/bash -xe
+      export LATEST_GIT_SHA=$(curl -H "X-TrackerToken: $TRACKER_API_TOKEN" "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd/9c1a65985558b645d869c2adf0f162fc" | grep -oE "([^"latest_git_sha\":][a-zA-Z0-9]+)")
+      git config --global core.pager cat
+      if git log $LATEST_GIT_SHA~..$LATEST_GIT_SHA; then
+        true # all is well
+      else
+        echo "$LATEST_GIT_SHA missing, assuming the worst"
+        export LATEST_GIT_SHA=null
+      fi
+      export NEW_LATEST_GIT_SHA=$(git rev-parse HEAD)
+      if [ "$LATEST_GIT_SHA" == "null" ]; then
+        export STORY_IDS=($(git log -10 | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
+      else
+        export STORY_IDS=($(git log $LATEST_GIT_SHA..HEAD | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
+      fi
+      curl -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"passed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['$(IFS=,; echo "${STORY_IDS[*]}")'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd"
+      """
+    }
+
+
+    failure {
+      sh """ #!/bin/bash -xe
+      export LATEST_GIT_SHA=$(curl -H "X-TrackerToken: $TRACKER_API_TOKEN" "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd/9c1a65985558b645d869c2adf0f162fc" | grep -oE "([^"latest_git_sha\":][a-zA-Z0-9]+)")
+      git config --global core.pager cat
+      if git log $LATEST_GIT_SHA~..$LATEST_GIT_SHA; then
+        true # all is well
+      else
+        echo "$LATEST_GIT_SHA missing, assuming the worst"
+        export LATEST_GIT_SHA=null
+      fi
+      if [ "$LATEST_GIT_SHA" == "null" ]; then
+        export STORY_IDS=($(git log -10 | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
+      else
+        export STORY_IDS=($(git log $LATEST_GIT_SHA..HEAD | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
+      fi
+      curl -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"failed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['$(IFS=,; echo "${STORY_IDS[*]}")'], "version":1}' "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd"
+      """
+    }
+  }
 
   tools {
     maven 'Maven3.6.3'
@@ -268,5 +309,6 @@ pipeline {
   }
   environment {
     SONAR_AUTH = credentials('sonar-login')
+    TRACKER_API_TOKEN = credentials('tracker-api-token')
   }
 }
