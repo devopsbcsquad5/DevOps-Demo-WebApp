@@ -204,7 +204,7 @@ pipeline {
       steps {
           slackSend channel: 'notify', message: "Performance Testing started for build : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
           // blazeMeterTest credentialsId: 'Blazemeter', testId: '9137429.taurus', workspaceId: '775624'
-          blazeMeterTest credentialsId: 'Blazemeter-Cred', testId: '9204220', workspaceId: '799387'
+          blazeMeterTest credentialsId: 'Blazemeter-Cred', testId: '9204220.taurus', workspaceId: '799387'
       }
       post {
         success {
