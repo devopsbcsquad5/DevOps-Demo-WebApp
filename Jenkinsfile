@@ -79,19 +79,21 @@ pipeline {
         }
       }
     }
-    // post {
-    //   success {
-    //     script {
-    //       sh '''
+    post {
+      success {
+        script {
+          sh '''
+            ### Code to update the Story state
+            story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
+            my_merge_branch=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2`
+            curl -v -X PUT -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{"current_state":"finished"}' "${MY_PIVOTAL_STORIES}/${story_nbr}"
 
-    //       '''
-    //     }
-    //     curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{ "text":"Pipeline have created a stage tag for the story and published the release in the github.\\n **URL**:  '${MY_GITHUB_REALEASE_TAG}'/'${deploy_env}-${myVersion}' \\n \\n Code is merged to master and deployed to '${currentPCFEnv}' PCF Environment.\\n \\n Story status is updated to **ACCEPTED** " }' "${PIVOTAL_STORIES}/${ticket}/comments"
-    //   }
-    //   failure {
-
-    //   }
-    // }
+            ### Code to add the comments to the pivotal story
+            curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{ "text":"Squad-5 Pipeline started due to new code merge to master from '${story_nbr}' in the github.\\n **BRANCH**:  '${my_merge_branch}' \\n **REPO**:  '${MY_REPO}'\\n \\n \\n Story status is updated to **FINISHED** " }' "${MY_PIVOTAL_STORIES}/${story_nbr}/comments"
+          '''
+        }
+      }
+    }
     stage('Configure Test & Prod Server') {
       steps {
         slackSend channel: 'notify', message: "Configure Test & Prod Server started for : ${env.JOB_NAME} ${env.BUILD_NUMBER}"
@@ -222,6 +224,17 @@ pipeline {
       post {
         success {
           slackSend channel: 'notify', message: "Performance Testing succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+          script {
+            sh '''
+              ### Code to update the Story state
+              story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
+              my_merge_branch=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2`
+              curl -v -X PUT -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{"current_state":"delivered"}' "${MY_PIVOTAL_STORIES}/${story_nbr}"
+
+              ### Code to add the comments to the pivotal story
+              curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{ "text":"Squad-5 Pipeline deployed the new code to AWS Test-Server from artifactory using docker compose and ran the UI and Performance testing. \\n **Story ID**:  '${story_nbr}' \\n **BRANCH**:  '${my_merge_branch}' \\n **REPO**:  '${MY_REPO}'\\n \\n \\n Story status is updated to **DELIVERED** " }' "${MY_PIVOTAL_STORIES}/${story_nbr}/comments"
+            '''
+          }
         }
         failure {
           slackSend channel: 'notify', message: "Performance Testing failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
@@ -266,6 +279,17 @@ pipeline {
         }
         success {
           slackSend channel: 'notify', message: "Sanity Testing on Prod Server succesfully completed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
+          script {
+            sh '''
+              ### Code to update the Story state
+              story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
+              my_merge_branch=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2`
+              curl -v -X PUT -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{"current_state":"accepted"}' "${MY_PIVOTAL_STORIES}/${story_nbr}"
+
+              ### Code to add the comments to the pivotal story
+              curl -v -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Accept: application/json" -H "Content-Type: application/json" --data '{ "text":"Squad-5 Pipeline deployed the new code to AWS Prod-Server from artifactory using docker compose and completed the Sanity testing. Code is live to end-user \\n **Story ID**:  '${story_nbr}' \\n **BRANCH**:  '${my_merge_branch}' \\n **REPO**:  '${MY_REPO}'\\n \\n \\n Story status is updated to **ACCEPTED** " }' "${MY_PIVOTAL_STORIES}/${story_nbr}/comments"
+            '''
+          }
         }
         failure {
           slackSend channel: 'notify', message: "Sanity Testing on Prod Server failed for : ${env.JOB_NAME} ${env.BUILD_NUMBER}" 
@@ -277,49 +301,27 @@ pipeline {
   post {
     success {
       script {
-        sh ''' #!/bin/bash -xe
-          export LATEST_GIT_SHA=$(curl -H "X-TrackerToken: $TRACKER_API_TOKEN" "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd/9c1a65985558b645d869c2adf0f162fc" | grep -oE "([^"latest_git_sha\":][a-zA-Z0-9]+)")
-          git config --global core.pager cat
-          if git log $LATEST_GIT_SHA~..$LATEST_GIT_SHA; then
-            true # all is well
-          else
-            echo "$LATEST_GIT_SHA missing, assuming the worst"
-            export LATEST_GIT_SHA=null
-          fi
-          export NEW_LATEST_GIT_SHA=$(git rev-parse HEAD)
-          if [ "$LATEST_GIT_SHA" == "null" ]; then
-            export STORY_IDS=($(git log -10 | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
-          else
-            export STORY_IDS=($(git log $LATEST_GIT_SHA..HEAD | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
-          fi
-          curl -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"passed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['$(IFS=,; echo "${STORY_IDS[*]}")'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd"
+        sh '''
+            ### Code to update the Story CICD Pipeline status
+            export story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
+            export NEW_LATEST_GIT_SHA=$(git rev-parse HEAD)
+
+            curl -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"passed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "'${MY_PIVOTAL_CICD}'"
         '''
       }
     }
-
-
     failure {
       script {
-        sh ''' #!/bin/bash -xe
-          export LATEST_GIT_SHA=$(curl -H "X-TrackerToken: $TRACKER_API_TOKEN" "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd/9c1a65985558b645d869c2adf0f162fc" | grep -oE "([^"latest_git_sha\":][a-zA-Z0-9]+)")
-          git config --global core.pager cat
-          if git log $LATEST_GIT_SHA~..$LATEST_GIT_SHA; then
-            true # all is well
-          else
-            echo "$LATEST_GIT_SHA missing, assuming the worst"
-            export LATEST_GIT_SHA=null
-          fi
-          if [ "$LATEST_GIT_SHA" == "null" ]; then
-            export STORY_IDS=($(git log -10 | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
-          else
-            export STORY_IDS=($(git log $LATEST_GIT_SHA..HEAD | grep -E "\\[.*\\]" | grep -oE "\\[.*\\]" | grep -oE "([0-9]+)"))
-          fi
-          curl -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"failed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['$(IFS=,; echo "${STORY_IDS[*]}")'], "version":1}' "https://www.pivotaltracker.com/services/v5/projects/2490801/cicd"
+        sh '''
+            ### Code to update the Story CICD Pipeline status
+            export story_nbr=`git show ':/^Merge' --oneline| xargs| awk '{print $7}' | cut -d '/' -f2 | cut -d '-' -f1`
+            export NEW_LATEST_GIT_SHA=$(git rev-parse HEAD)
+
+            curl -X POST -H "X-TrackerToken: $TRACKER_API_TOKEN" -H "Content-Type: application/json" -d '{"status":"failed", "url":"'$BUILD_URL'", "uuid":"9c1a65985558b645d869c2adf0f162fc", "story_ids":['${story_nbr}'], "latest_git_sha":"'$NEW_LATEST_GIT_SHA'", "version":1}' "'${MY_PIVOTAL_CICD}'"
         '''
-      } 
+      }
     }
   }
-
   tools {
     maven 'Maven3.6.3'
     jdk 'JDK'
@@ -327,5 +329,8 @@ pipeline {
   environment {
     SONAR_AUTH = credentials('sonar-login')
     TRACKER_API_TOKEN = credentials('tracker-api-token')
+    MY_REPO="https://github.com/devopsbcsquad5/DevOps-Demo-WebApp"
+    MY_PIVOTAL_CICD="https://www.pivotaltracker.com/services/v5/projects/2490801/cicd"
+    MY_PIVOTAL_STORIES="https://www.pivotaltracker.com/services/v5/projects/2490801/stories"
   }
 }
